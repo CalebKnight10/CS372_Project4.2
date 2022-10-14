@@ -22,12 +22,13 @@ def get_next_word_packet(s):
 
     while True:
         end_of_packet = packet_buffer.find(b'\r\n\r\n')   # Check for double blank space
-
+        # end_of_packet = int.from_bytes(packet_buffer[:WORD_LEN_SIZE], 'big')
+        
         if end_of_packet != -1:        # indicating the packet is not incomplete
             packet = packet_buffer[:end_of_packet + WORD_LEN_SIZE]       # extract packet data
             packet_buffer = packet_buffer[end_of_packet + WORD_LEN_SIZE:]    # strip off front
-            #print(packet_buffer)
-            #print(packet)
+            # print(packet_buffer)
+            # print(packet)
             break
 
         chunk = s.recv(5)
@@ -36,11 +37,9 @@ def get_next_word_packet(s):
             break
 
         packet_buffer += chunk      # add the recv'd data to the buffer
-       
-        #print(packet_buffer)
+        # print(packet_buffer)
 
-    return packet
-
+    return packet_buffer
 
 def extract_word(word_packet):
     """
@@ -49,9 +48,10 @@ def extract_word(word_packet):
     followed by the UTF-8 word.
     * Returns the word decoded as a string.
     """
-    encoded_word = word_packet[:2]
+    encoded_word = word_packet[2:]
     decoded = encoded_word.decode('UTF-8')
-    #print(decoded)
+    return decoded
+    # print(decoded)
 
 # Do not modify:
 
