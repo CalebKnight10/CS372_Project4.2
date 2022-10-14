@@ -17,29 +17,30 @@ def get_next_word_packet(s):
     * Returns None if there are no more words, i.e. the server has hung
     up.
     """
+
     global packet_buffer
-    packet = b''
 
     while True:
-        end_of_packet = packet_buffer.find(b'\r\n\r\n')   # Check for double blank space
-        # end_of_packet = int.from_bytes(packet_buffer[:WORD_LEN_SIZE], 'big')
-        
-        if end_of_packet != -1:        # indicating the packet is not incomplete
+
+        byts = int.from_bytes(packet_buffer[:WORD_LEN_SIZE], 'big')
+        end_of_packet = byts + 2
+
+        if len(packet_buffer) >= end_of_packet:
             packet = packet_buffer[:end_of_packet + WORD_LEN_SIZE]       # extract packet data
             packet_buffer = packet_buffer[end_of_packet + WORD_LEN_SIZE:]    # strip off front
+
             # print(packet_buffer)
             # print(packet)
-            break
+
+            return packet
 
         chunk = s.recv(5)
 
-        if chunk == b'':    # if our recv'd bytestring is 0
-            break
+        if chunk == b'':  # if our recv'd bytestring is 0 
+            return None
 
-        packet_buffer += chunk      # add the recv'd data to the buffer
-        # print(packet_buffer)
-
-    return packet_buffer
+        packet_buffer += chunk
+        
 
 def extract_word(word_packet):
     """
