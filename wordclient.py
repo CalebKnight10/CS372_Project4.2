@@ -11,42 +11,47 @@ packet_buffer = b''
 
 def get_next_word_packet(s):
     """
-    Return the next word packet from the stream.
-
-    The word packet consists of the encoded word length followed by the
+    * Return the next word packet from the stream.
+    * The word packet consists of the encoded word length followed by the
     UTF-8-encoded word.
-
-    Returns None if there are no more words, i.e. the server has hung
+    * Returns None if there are no more words, i.e. the server has hung
     up.
     """
-
     global packet_buffer
+    packet = b''
 
     while True:
-        end_of_packet = packet_buffer.find(b'\r\n\r\n')
-        if end_of_packet != -1:
-            packet = packet_buffer[:end_of_packet + 5]
-            packet_buffer = packet_buffer[end_of_packet + 5:]
-            return packet_buffer
+        end_of_packet = packet_buffer.find(b'\r\n\r\n')   # Check for double blank space
+
+        if end_of_packet != -1:        # indicating the packet is not incomplete
+            packet = packet_buffer[:end_of_packet + WORD_LEN_SIZE]       # extract packet data
+            packet_buffer = packet_buffer[end_of_packet + WORD_LEN_SIZE:]    # strip off front
+            #print(packet_buffer)
+            #print(packet)
             break
-        if chunk == b'':
-            return none
-        packet_buffer = chunk 
+
+        chunk = s.recv(5)
+
+        if chunk == b'':    # if our recv'd bytestring is 0
+            break
+
+        packet_buffer += chunk      # add the recv'd data to the buffer
+       
+        #print(packet_buffer)
+
+    return packet
 
 
 def extract_word(word_packet):
     """
-    Extract a word from a word packet.
-
-    word_packet: a word packet consisting of the encoded word length
+    * Extract a word from a word packet.
+    * word_packet: a word packet consisting of the encoded word length
     followed by the UTF-8 word.
-
-    Returns the word decoded as a string.
+    * Returns the word decoded as a string.
     """
-
-    word_packet = packet_buffer[:2]
-    packet_buffer = packet_buffer[2:]
-    packet_buffer.decode('UTF-8')
+    encoded_word = word_packet[:2]
+    decoded = encoded_word.decode('UTF-8')
+    #print(decoded)
 
 # Do not modify:
 
@@ -67,6 +72,7 @@ def main(argv):
         word_packet = get_next_word_packet(s)
 
         if word_packet is None:
+            print("packet is none ERROR")
             break
 
         word = extract_word(word_packet)
