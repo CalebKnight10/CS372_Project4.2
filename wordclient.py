@@ -22,12 +22,11 @@ def get_next_word_packet(s):
 
     while True:
 
-        byts = int.from_bytes(packet_buffer[:WORD_LEN_SIZE], 'big')
-        end_of_packet = byts + 2
+        end_of_packet = int.from_bytes(packet_buffer[:WORD_LEN_SIZE], 'big') + 2
 
         if len(packet_buffer) >= end_of_packet:
-            packet = packet_buffer[:end_of_packet + WORD_LEN_SIZE]       # extract packet data
-            packet_buffer = packet_buffer[end_of_packet + WORD_LEN_SIZE:]    # strip off front
+            packet = packet_buffer[:end_of_packet]       # extract packet data
+            packet_buffer = packet_buffer[end_of_packet:]    # strip off front
 
             # print(packet_buffer)
             # print(packet)
@@ -40,7 +39,7 @@ def get_next_word_packet(s):
             return None
 
         packet_buffer += chunk
-        
+
 
 def extract_word(word_packet):
     """
@@ -73,7 +72,7 @@ def main(argv):
         word_packet = get_next_word_packet(s)
 
         if word_packet is None:
-            print("packet is none ERROR")
+            # print("packet is none ERROR")
             break
 
         word = extract_word(word_packet)
